@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+
+    <!-- jQuery -->
+	
+    <script src="https://cdn.firebase.com/js/client/2.2.1/firebase.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+
+    <!-- Custom CSS -->
+    <style>
+      #firechat-wrapper {
+        height: 475px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        background-color: #fff;
+        margin: 50px auto;
+        text-align: center;
+        -webkit-border-radius: 4px;
+        -moz-border-radius: 4px;
+        border-radius: 4px;
+        -webkit-box-shadow: 0 5px 25px #666;
+        -moz-box-shadow: 0 5px 25px #666;
+        box-shadow: 0 5px 25px #666;
+      }
+    </style>
+  </head>
+
+  <!--
+    Example: Anonymous Authentication
+
+    This example uses Firebase Simple Login to create "anonymous" user sessions in Firebase,
+    meaning that user credentials are not required, though a user has a valid Firebase
+    authentication token and security rules still apply.
+
+    Requirements: in order to use this example with your own Firebase, you'll need to do the following:
+      1. Apply the security rules at https://github.com/firebase/firechat/blob/master/rules.json
+      2. Enable the "Anonymous" authentication provider in Forge
+      3. Update the URL below to reference your Firebase
+      4. Update the room id for auto-entry with a public room you have created
+   -->
+  <body>
+	<div id="messageDiv"></div>
+	<input type="text" class="name" placeholder="Your Name.." />
+	<input type="text" class="msg" placeholder="Your message.." />
+	<button onclick="sendmsg()">Send</button>
+    <script type="text/javascript">
+	  var room_id = "shj1820938isdadiauq"
+      var DBref = new Firebase('https://gelaro-dev.firebaseio.com/'+room_id);
+	  $(".msg").keypress(function(e){
+		var name=$(".name").val();
+		var txt=$(".msg").val();
+		var tgl = new Date().getDate();
+		var bln = new Date().getMonth();
+		var thn = new Date().getFullYear();
+		var jam = new Date().getHours();
+		var mnt = '0'+new Date().getMinutes();
+		var dtk = '0'+new Date().getSeconds();
+		if(jam > 9){
+			var wkt = parseInt(jam, 10) + ':' + mnt.substr(-2) + ':' + dtk.substr(-2);
+		}else{
+			var wkt = jam + ':' + mnt.substr(-2) + ':' + dtk.substr(-2);
+		}
+		var time = tgl+'-'+ (bln+1) +'-'+ thn +', '+ wkt
+		
+		if(e.keyCode==13){
+			if(name!="" && txt!=""){
+				DBref.push({name:name,text:txt,time:time});
+				$(".msg").val("");
+			}else{
+				alert("isi semua kolom")
+			}
+		}
+		
+		
+	  });
+	  
+	  function sendmsg(){
+		var name=$(".name").val();
+		var txt=$(".msg").val();
+		var tgl = new Date().getDate();
+		var bln = new Date().getMonth();
+		var thn = new Date().getFullYear();
+		var jam = new Date().getHours();
+		var mnt = '0'+new Date().getMinutes();
+		var dtk = '0'+new Date().getSeconds();
+		if(jam > 9){
+			var wkt = parseInt(jam, 10) + ':' + mnt.substr(-2) + ':' + dtk.substr(-2);
+		}else{
+			var wkt = jam + ':' + mnt.substr(-2) + ':' + dtk.substr(-2);
+		}
+		var time = tgl+'-'+ (bln+1) +'-'+ thn +', '+ wkt
+		DBref.push({name:name,text:txt,time:time});
+		$(".msg").val("");
+	  }
+	  
+	  DBref.on("child_added",function(snapshot){
+		var message = snapshot.val();
+		displayMsg(message.name,message.text,message.time)
+	  });
+	  
+	  function displayMsg(name,text,time){
+		$("<div/>").text(text).prepend($("<em />").text(name +' ('+ time +') : ')).appendTo($('#messageDiv'));
+		$('#messageDiv')[0].scrollTop = $('#messageDiv')[0].scrollHeight;
+	  }
+    </script>
+  </body>
+</html>
